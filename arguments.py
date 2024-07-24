@@ -19,5 +19,6 @@ def get_args():
     parser.add_argument('--critic_model', dest='critic_model', type=str, default='')   # your critic model filename
 
     args = parser.parse_args()
+    #参数
 
     return args
