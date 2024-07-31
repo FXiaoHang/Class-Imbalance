@@ -22,6 +22,22 @@ import scipy.sparse as sp
 
 
 def data_spilit(labels, num_cls):
+    """
+    将数据集划分为训练集、验证集和测试集，并确保每个类别的样本数量平衡。
+
+    参数:
+        labels - 数据集的标签
+        num_cls - 类别数量
+
+    返回:
+        train_set - 训练集样本索引
+        train_y - 训练集标签
+        val - 验证集样本索引
+        val_y - 验证集标签
+        test - 测试集样本索引
+        test_y - 测试集标签
+        unlable - 未标记样本索引
+    """
     num_nodes = labels.shape[0]
     rand_indices = np.random.permutation(num_nodes)
     test = rand_indices[:1500]
@@ -88,6 +104,14 @@ def data_spilit(labels, num_cls):
 
 
 def load_cora():
+    """
+    加载Cora数据集，包括特征数据、标签和邻接列表。
+
+    返回:
+        feat_data - 特征数据
+        labels - 标签
+        adj_lists - 邻接列表
+    """
     num_nodes = 2708
     num_feats = 1433
     feat_data = np.zeros((num_nodes, num_feats))
@@ -115,6 +139,21 @@ def load_cora():
 
 
 def run_cora():
+    """
+    运行Cora数据集的预处理，包括数据划分和特征转换。
+
+    返回:
+        train_x - 训练集样本索引
+        train_y - 训练集标签
+        val_x - 验证集样本索引
+        val_y - 验证集标签
+        test_x - 测试集样本索引
+        test_y - 测试集标签
+        unlable - 未标记样本索引
+        features - 特征数据
+        adj_lists - 邻接列表
+        labels - 标签
+    """
     np.random.seed(1)
     random.seed(1)
     num_cls = 7
@@ -138,14 +177,19 @@ def run_cora():
 
 def test_model(env, actor_model, test_x, test_y, features, adj_lists, labels):
     """
-        Tests the model.
+    测试模型。
 
-        Parameters:
-            env - the environment to test the policy on
-            actor_model - the actor model to load in
+    参数:
+        env - 测试策略的环境
+        actor_model - 要加载的actor模型
+        test_x - 测试集样本索引
+        test_y - 测试集标签
+        features - 特征数据
+        adj_lists - 邻接列表
+        labels - 标签
 
-        Return:
-            None
+    返回:
+        None
     """
     print(f"Testing {actor_model}", flush=True)
 
@@ -155,8 +199,8 @@ def test_model(env, actor_model, test_x, test_y, features, adj_lists, labels):
         sys.exit(0)
 
     # Extract out dimensions of observation and action spaces
-    obs_dim = 384  # env.observation_space.shape[0]
-    act_dim = 2  # env.action_space.shape[0]
+    obs_dim = 384  # env.observation_space.shape[0]# 观察空间的维度
+    act_dim = 2  # env.action_space.shape[0] # 动作空间的维度
 
     # Build our policy the same way we build our actor model in PPO
     policy = MLP(obs_dim, act_dim)
