@@ -21,8 +21,8 @@ from arguments import get_args
 import scipy.sparse as sp
 
 
-def data_spilit(labels, num_cls):
-    num_nodes = labels.shape[0]
+def data_spilit(labels, num_cls): # 数据集划分
+    num_nodes = labels.shape[0] 
     rand_indices = np.random.permutation(num_nodes)
     test = rand_indices[:1500]
     val = rand_indices[1500:2000]
