@@ -37,18 +37,21 @@ def data_spilit(labels, num_cls):
         test - 测试集样本索引
         test_y - 测试集标签
         unlable - 未标记样本索引
-    """
-    num_nodes = labels.shape[0]
-    rand_indices = np.random.permutation(num_nodes)
+    """ 
+    num_nodes = labels.shape[0]  # 获取数据集中样本的数量
+    rand_indices = np.random.permutation(num_nodes) # 生成一个随机排列的索引数组，用于随机划分数据集
     test = rand_indices[:1500]
     val = rand_indices[1500:2000]
     train_set = list(rand_indices[2000:])
+    # 将随机排列的索引数组划分为测试集，验证集，训练集
     # train = random.sample(train, 100)
 
-    tr_ratio = []
-    count_tr = np.zeros(num_cls)
+    tr_ratio = [] # 存储训练集样本索引
+    count_tr = np.zeros(num_cls) # 每个类别已选择的样本数量
     # count_tr_ratio = np.array([20, 6, 20, 6, 20, 20, 6])
-    count_tr_ratio = np.array([20, 20, 20, 20, 6, 6, 6])
+    count_tr_ratio = np.array([20, 20, 20, 20, 6, 6, 6])  # 每个类别的样本数量限制
+
+
     for i in train_set:
         for j in range(num_cls):
             if labels[i] == j:
@@ -59,10 +62,10 @@ def data_spilit(labels, num_cls):
         # count_tr[labels[i]] += 1
         if count_tr[labels[i]] <= count_tr_ratio[labels[i]]:
             tr_ratio.append(i)
-    train_set = tr_ratio
+    train_set = tr_ratio  # 根据每个类别的样本数量限制，筛选出平衡的训练集样本索引
 
-    test_balanced = []
-    count_test = np.zeros(num_cls)
+    test_balanced = [] # 存储平衡的测试集样本索引
+    count_test = np.zeros(num_cls)  # 每个类别已选择的样本数量
     for i in test:
         for j in range(num_cls):
             if labels[i] == j:
@@ -70,9 +73,9 @@ def data_spilit(labels, num_cls):
                 break
         if count_test[labels[i]] <= 100:
             test_balanced.append(i)
-    test = test_balanced
+    test = test_balanced  # 根据每个类别的样本数量限制，筛选出平衡的测试集样本索引
 
-    val_bal = []
+    val_bal = [] # 存储平衡的验证集样本索引
     count_val = np.zeros(num_cls)
     for i in val:
         for j in range(num_cls):
@@ -81,21 +84,21 @@ def data_spilit(labels, num_cls):
                 break
         if count_val[labels[i]] <= 30:
             val_bal.append(i)
-    val = val_bal
+    val = val_bal # 根据每个类别的样本数量限制，筛选出平衡的验证集样本索引
 
-    index = np.arange(0, num_nodes)
-    unlable = np.setdiff1d(index, train_set)
+    index = np.arange(0, num_nodes)  # 所有样本的索引
+    unlable = np.setdiff1d(index, train_set)  # 未标记样本的索引
     unlable = np.setdiff1d(unlable, val)
     unlable = np.setdiff1d(unlable, test)
     # train_x = train
-    train_y = []
+    train_y = []  # 训练集标签
     for i in train_set:
         train_y.append(int(labels[i]))
     # print(train_y)
-    val_y = []
+    val_y = [] # 验证集标签
     for i in val:
         val_y.append(int(labels[i]))
-    test_y = []
+    test_y = [] # 测试集标签
     for i in test:
         test_y.append(int(labels[i]))
 
@@ -112,14 +115,15 @@ def load_cora():
         labels - 标签
         adj_lists - 邻接列表
     """
-    num_nodes = 2708
-    num_feats = 1433
-    feat_data = np.zeros((num_nodes, num_feats))
-    labels = np.empty((num_nodes,1), dtype=np.int64)
-    node_map = {}
-    label_map = {}
-    with open("cora/cora.content") as fp:
-        for i, line in enumerate(fp):
+    num_nodes = 2708 # 节点数量
+    num_feats = 1433  # 特征数量
+    feat_data = np.zeros((num_nodes, num_feats)) # 创建一个全零矩阵作为特征数据
+    labels = np.empty((num_nodes,1), dtype=np.int64) # 创建一个空的标签数组
+    node_map = {} # 创建一个空的节点映射字典
+    label_map = {} # 创建一个空的标签映射字典
+
+    with open("cora/cora.content") as fp: # 打开cora.content文件
+        for i, line in enumerate(fp): # 遍历文件中的每一行
             info = line.strip().split()
             feat_data[i, :] = list(map(float, info[1:-1]))
             node_map[info[0]] = i
@@ -131,11 +135,11 @@ def load_cora():
     with open("cora/cora.cites") as fp:
         for i,line in enumerate(fp):
             info = line.strip().split()
-            paper1 = node_map[info[0]]
-            paper2 = node_map[info[1]]
-            adj_lists[paper1].add(paper2)
-            adj_lists[paper2].add(paper1)
-    return feat_data, labels, adj_lists
+            paper1 = node_map[info[0]]  # 获取论文1的索引
+            paper2 = node_map[info[1]]  # 获取论文2的索引
+            adj_lists[paper1].add(paper2)  # 将论文2添加到论文1的邻接列表中
+            adj_lists[paper2].add(paper1)  # 将论文1添加到论文2的邻接列表中
+    return feat_data, labels, adj_lists  # 返回特征数据、标签和邻接列表
 
 
 def run_cora():
@@ -154,7 +158,7 @@ def run_cora():
         adj_lists - 邻接列表
         labels - 标签
     """
-    np.random.seed(1)
+    np.random.seed(1) 
     random.seed(1)
     num_cls = 7
     feat_data, labels, adj_lists = load_cora()
