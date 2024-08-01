@@ -124,7 +124,7 @@ def load_cora():
 
     with open("cora/cora.content") as fp: # 打开cora.content文件
         for i, line in enumerate(fp): # 遍历文件中的每一行
-            info = line.strip().split()
+            info = line.strip().split() # 去除首尾空格并按空格分割字符串
             feat_data[i, :] = list(map(float, info[1:-1]))
             node_map[info[0]] = i
             if not info[-1] in label_map:
