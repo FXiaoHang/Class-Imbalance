@@ -18,7 +18,7 @@ class Encoder(nn.Module):
             feature_transform=False):
         super(Encoder, self).__init__()
 
-        self.features = features  # 节点特征
+        self.features = features  # 节点特征git
         self.feat_dim = feature_dim  # 特征维度
         self.adj_lists = adj_lists  # 邻接列表
         self.aggregator = aggregator  # 聚合器

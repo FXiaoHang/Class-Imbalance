@@ -21,10 +21,6 @@ from arguments import get_args
 import scipy.sparse as sp
 
 
-<<<<<<< HEAD
-def data_spilit(labels, num_cls): # 数据集划分
-    num_nodes = labels.shape[0] 
-=======
 def data_spilit(labels, num_cls):
     """
     将数据集划分为训练集、验证集和测试集，并确保每个类别的样本数量平衡。
@@ -43,7 +39,6 @@ def data_spilit(labels, num_cls):
         unlable - 未标记样本索引
     """
     num_nodes = labels.shape[0]
->>>>>>> 55813eb7c2d26b60956bad95f8b4e1117cbedcf8
     rand_indices = np.random.permutation(num_nodes)
     test = rand_indices[:1500]
     val = rand_indices[1500:2000]
