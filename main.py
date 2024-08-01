@@ -125,10 +125,14 @@ def load_cora():
     with open("cora/cora.content") as fp: # 打开cora.content文件
         for i, line in enumerate(fp): # 遍历文件中的每一行
             info = line.strip().split() # 去除首尾空格并按空格分割字符串
+            # 将特征数据转换为浮点数并存储在feat_data中
             feat_data[i, :] = list(map(float, info[1:-1]))
+            # 将节点映射到索引i
             node_map[info[0]] = i
+            # 如果标签不在标签映射中，则添加到标签映射中
             if not info[-1] in label_map:
                 label_map[info[-1]] = len(label_map)
+            # 将标签映射到labels数组中
             labels[i] = label_map[info[-1]]
 
     adj_lists = defaultdict(set)
@@ -145,7 +149,6 @@ def load_cora():
 def run_cora():
     """
     运行Cora数据集的预处理，包括数据划分和特征转换。
-
     返回:
         train_x - 训练集样本索引
         train_y - 训练集标签
@@ -158,31 +161,27 @@ def run_cora():
         adj_lists - 邻接列表
         labels - 标签
     """
-    np.random.seed(1) 
-    random.seed(1)
-    num_cls = 7
-    feat_data, labels, adj_lists = load_cora()
-    features = nn.Embedding(2708, 1433)
-    features.weight = nn.Parameter(torch.FloatTensor(feat_data), requires_grad=False)
-    # features.cuda()
-
-    train_x, train_y, val_x, val_y, test_x, test_y, unlable = data_spilit(labels, num_cls)
-
-    train_x = torch.LongTensor(train_x)
-    train_y = torch.LongTensor(train_y)
-    val_x = torch.LongTensor(val_x)
-    val_y = torch.LongTensor(val_y)
-    test_x = torch.LongTensor(test_x)
-    test_y = torch.LongTensor(test_y)
-    unlable = torch.LongTensor(unlable)
-
-    return train_x, train_y, val_x, val_y, test_x, test_y, unlable, features, adj_lists, labels
+    np.random.seed(1)  # 设置随机种子以确保结果可重复
+    random.seed(1)  # 设置随机种子以确保结果可重复
+    num_cls = 7  # 类别数量
+    feat_data, labels, adj_lists = load_cora()  # 加载Cora数据集的特征数据、标签和邻接列表
+    features = nn.Embedding(2708, 1433)  # 创建一个Embedding层用于存储特征数据
+    features.weight = nn.Parameter(torch.FloatTensor(feat_data), requires_grad=False)  # 将特征数据转换为Tensor并赋值给Embedding层的权重
+    # features.cuda()  # 将特征数据移动到GPU（如果可用）
+    train_x, train_y, val_x, val_y, test_x, test_y, unlable = data_spilit(labels, num_cls)  # 划分数据集为训练集、验证集、测试集和未标记集
+    train_x = torch.LongTensor(train_x)  # 转换训练集样本索引为LongTensor类型
+    train_y = torch.LongTensor(train_y)  # 转换训练集标签为LongTensor类型
+    val_x = torch.LongTensor(val_x)  # 转换验证集样本索引为LongTensor类型
+    val_y = torch.LongTensor(val_y)  # 转换验证集标签为LongTensor类型
+    test_x = torch.LongTensor(test_x)  # 转换测试集样本索引为LongTensor类型
+    test_y = torch.LongTensor(test_y)  # 转换测试集标签为LongTensor类型
+    unlable = torch.LongTensor(unlable)  # 转换未标记集索引为LongTensor类型
+    return train_x, train_y, val_x, val_y, test_x, test_y, unlable, features, adj_lists, labels  # 返回处理后的数据
 
 
 def test_model(env, actor_model, test_x, test_y, features, adj_lists, labels):
     """
     测试模型。
-
     参数:
         env - 测试策略的环境
         actor_model - 要加载的actor模型
@@ -191,52 +190,52 @@ def test_model(env, actor_model, test_x, test_y, features, adj_lists, labels):
         features - 特征数据
         adj_lists - 邻接列表
         labels - 标签
-
     返回:
         None
     """
+    # 打印测试模型的信息
     print(f"Testing {actor_model}", flush=True)
-
-    # If the actor model is not specified, then exit
+    
+    # 如果未指定actor模型，则退出
     if actor_model == '':
         print(f"Didn't specify model file. Exiting.", flush=True)
         sys.exit(0)
-
-    # Extract out dimensions of observation and action spaces
+    
+    # 提取观察空间和动作空间的维度
     obs_dim = 384  # env.observation_space.shape[0]# 观察空间的维度
     act_dim = 2  # env.action_space.shape[0] # 动作空间的维度
-
-    # Build our policy the same way we build our actor model in PPO
+    
+    # 构建策略，与PPO算法中构建actor模型的方式相同
     policy = MLP(obs_dim, act_dim)
-
-    # Load in the actor model saved by the PPO algorithm
+    
+    # 加载由PPO算法保存的actor模型
     policy.load_state_dict(torch.load(actor_model))
-
+    
+    # 评估策略
     eval_policy(policy=policy, env=env, test_x=test_x, test_y=test_y, features=features, adj_lists=adj_lists, labels=labels)
 
 
 def main(args):
     """
-        The main function to run.
-
-        Parameters:
-            args - the arguments parsed from command line
-
-        Return:
-            None
+    The main function to run.
+    Parameters:
+        args - the arguments parsed from command line
+    Return:
+        None
     """
-
+    # 运行Cora数据集的预处理，包括数据划分和特征转换
     train_x, train_y, val_x, val_y, test_x, test_y, unlable, features, adj_lists, labels = run_cora()
-
+    
+    # 创建环境对象
     env = Env(train_x, train_y, unlable, val_x, val_y, features, adj_lists, test_x, test_y)
-
+    
+    # 如果模式为测试，则执行测试模型
     if args.mode == 'test':
         test_model(env=env, actor_model='ppo_actor.pth', test_x=test_x, test_y=test_y, features=features, adj_lists=adj_lists, labels=labels)
 
-
 if __name__ == "__main__":
-    args = get_args()  # Parse arguments from command line
-    args.mode = "test"
-    main(args)
+    args = get_args()  # 解析命令行参数
+    args.mode = "test"  # 设置模式为测试
+    main(args)  # 调用主函数
 
 
